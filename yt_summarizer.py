@@ -1,3 +1,4 @@
+import os
 import yt_dlp
 import requests
 import urllib.request
@@ -8,6 +9,8 @@ from langchain.chat_models import ChatOpenAI
 from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+openaikey = os.environ.get('openaikey')
 
 def extract_metadata(video_url):
     ydl_opts = {'quiet':True}
@@ -44,7 +47,7 @@ def get_plain_text_from_ttml(url):
     
 def map_reduce_and_summarize(plain_text):
     if plain_text:
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key="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")
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key=openaikey)
         num_tokens = llm.get_num_tokens(plain_text)
         print (f"Our text has {num_tokens} tokens")
 
