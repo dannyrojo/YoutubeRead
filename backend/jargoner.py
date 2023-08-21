@@ -33,7 +33,7 @@ def get_plain_text_from_ttml(url):
         return None
     
 def map_reduce_and_summarize(plain_text):
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key="openaikey")
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key=openaikey)
     num_tokens = llm.get_num_tokens(plain_text)
     print (f"Our text has {num_tokens} tokens")
 

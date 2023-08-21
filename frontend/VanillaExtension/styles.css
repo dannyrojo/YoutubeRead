@@ -1,0 +1,21 @@
+/* Apply styles to the entire body */
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  /* Style the headings */
+  h2 {
+    color: #333;
+  }
+  
+  /* Style the radio buttons */
+  input[type="radio"] {
+    margin-right: 5px;
+  }
+  
+  /* Style the labels for the radio buttons */
+  label {
+    color: #666;
+  }
+  

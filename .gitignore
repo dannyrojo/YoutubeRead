@@ -1,4 +1,8 @@
 venv/
+backend/venv/
+frontend/venv
 github
 github.pub
 .env
+loadkeys.sh
+

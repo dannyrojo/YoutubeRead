@@ -9,12 +9,33 @@ from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+def extract_urls_from_playlist(playlist_url):
+    video_url_list = []
+    ydl_opts = {'quiet':True, 'extract_flat':True}
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        playlist_info = ydl.extract_info(playlist_url, download=False)
+    if 'entries' in playlist_info:
+        entries = playlist_info['entries']
+        for entry in entries:
+            video_url = entry['url']
+            video_url_list.append(video_url)
+    return video_url_list
+
+def process_video_url_list(video_url_list, lang):
+    for video_url in video_url_list:
+        metadata = extract_metadata(video_url)
+        subtitle_url = get_subtitle_url(metadata, lang)
+        plain_text = get_plain_text_from_ttml(subtitle_url)
+        summary = map_reduce_and_summarize(plain_text)
+        video_title, video_description, upload_date, duration_string = get_title_and_description(metadata)
+        save_info(video_url, summary, video_title, video_description, upload_date, duration_string)
+
 def extract_metadata(video_url):
     ydl_opts = {'quiet':True}
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         metadata = ydl.extract_info(video_url, download=False)
         return metadata
-
+                    
 def get_subtitle_url(metadata, lang):
     language_codes_to_check = [lang, lang.split('-')[0]]  # Create an array of possible subtitle keywords
     for code in language_codes_to_check:
@@ -27,7 +48,7 @@ def get_subtitle_url(metadata, lang):
                 if sub['ext'] == 'ttml':
                     return sub['url']
     return None  # Return None if URL not found
-               
+                
 def get_plain_text_from_ttml(url):
     if url:    
         response = requests.get(url)
@@ -44,7 +65,7 @@ def get_plain_text_from_ttml(url):
     
 def map_reduce_and_summarize(plain_text):
     if plain_text:
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key="openaikey")
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key=openaikey)
         num_tokens = llm.get_num_tokens(plain_text)
         print (f"Our text has {num_tokens} tokens")
 
@@ -58,14 +79,14 @@ def map_reduce_and_summarize(plain_text):
         
     
         map_prompt = """
-        The following text has important information on how to use an API library, please write a summary that includes all information related to using the API. 
+        Write a concise summary of the following: 
         "{text}"
         SUMMARY:
         """
         map_prompt_template = PromptTemplate(template=map_prompt, input_variables=["text"])
         
         combine_prompt = """
-        The following text includes important information on using an API, please list the information in a numbered step by step way.
+        Write a concise summary of the following text delimited by triple backquotes.  Return your response in bullet points which covers the key points of the text.
         '''{text}'''
         MAIN POINTS:
         """
@@ -97,32 +118,20 @@ def save_info(video_url, summary, video_title, video_description, upload_date, d
         # Save video information to a text document
         with open(f'{sanitized_video_title}' + '_info.md', 'w') as md_file:
             md_file.write(f"Video Title: {video_title}\n")
-            md_file.write(f"Duration: {duration_string}\n")
             md_file.write(f"URL: {video_url}\n")
+            md_file.write(f"Duration: {duration_string}\n")
             md_file.write(f"Upload Date: {upload_date}\n\n")
             md_file.write(f"Summary: {summary}\n\n")
             md_file.write(f"Video Description: {video_description}\n\n")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Provide the url, output path, and (potentially) areas of focus")
-    parser.add_argument("url", help="URL of Video")
-    #parser.add_argument("refine", help="Refine the summary with parameters")
+    parser.add_argument("url", help="URL of Playlist")
     args = parser.parse_args()
     
-    # Specify the video URL and output path
-    video_url = args.url
-  
+    # Specify the playlist URL and lang
+    playlist_url = args.url
     lang = "en-US"
-   
 
-    # Call the functions
-    metadata = extract_metadata(video_url)
-    subtitle_url = get_subtitle_url(metadata, lang)
-    plain_text = get_plain_text_from_ttml(subtitle_url)
-    summary = map_reduce_and_summarize(plain_text)
-    video_title, video_description, upload_date, duration_string = get_title_and_description(metadata)
-    save_info(video_url, summary, video_title, video_description, upload_date, duration_string)
-
-
-
-
+    video_url_list = extract_urls_from_playlist(playlist_url)
+    process_video_url_list(video_url_list, lang)
