@@ -1,9 +1,9 @@
 {
     "manifest_version": 3,
-    "name": "Simple Extension",
+    "name": "YoutubeRead",
     "version": "1.0",
-    "description": "A simple browser extension with radio buttons",
-    "permissions": ["scripting", "activeTab"],
+    "description": "A simple extension to summarize Youtube videos",
+    "permissions": ["scripting", "activeTab", "tabs"],
     "action": {
       "default_popup": "popup.html",
       "default_icon": {

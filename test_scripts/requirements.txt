@@ -10,7 +10,7 @@ dataclasses-json==0.5.14
 frozenlist==1.4.0
 greenlet==2.0.2
 idna==3.4
-langchain==0.0.268
+langchain==0.0.270
 langsmith==0.0.25
 marshmallow==3.20.1
 multidict==6.0.4
