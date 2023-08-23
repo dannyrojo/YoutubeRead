@@ -5,4 +5,4 @@ github
 github.pub
 .env
 loadkeys.sh
-
+__pycache__

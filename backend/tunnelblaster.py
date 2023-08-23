@@ -1,3 +1,4 @@
+import os
 import yt_dlp
 import requests
 import urllib.request
@@ -11,32 +12,57 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 def extract_urls_from_playlist(playlist_url):
     video_url_list = []
-    ydl_opts = {'quiet':True, 'extract_flat':True}
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        playlist_info = ydl.extract_info(playlist_url, download=False)
-    if 'entries' in playlist_info:
-        entries = playlist_info['entries']
-        for entry in entries:
-            video_url = entry['url']
-            video_url_list.append(video_url)
+    ydl_opts = {'quiet': True, 'extract_flat': True}
+    
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            playlist_info = ydl.extract_info(playlist_url, download=False)
+        if 'entries' in playlist_info:
+            entries = playlist_info['entries']
+            for entry in entries:
+                video_url = entry['url']
+                video_url_list.append(video_url)
+    except yt_dlp.utils.DownloadError as e:
+        print(f"Error extracting playlist: {str(e)}")
     return video_url_list
 
-def process_video_url_list(video_url_list, lang):
-    for video_url in video_url_list:
-        metadata = extract_metadata(video_url)
-        subtitle_url = get_subtitle_url(metadata, lang)
-        plain_text = get_plain_text_from_ttml(subtitle_url)
-        summary = map_reduce_and_summarize(plain_text)
-        video_title, video_description, upload_date, duration_string = get_title_and_description(metadata)
-        save_info(video_url, summary, video_title, video_description, upload_date, duration_string)
+def process_video_urls(video_urls):
+    if isinstance(video_urls, str):
+        video_urls = [video_urls]
+    results = []
+    for video_url in video_urls:
+        try:
+            metadata = extract_metadata(video_url)
+            subtitle_url = get_subtitle_url(metadata)
+            plain_text = get_plain_text_from_ttml(subtitle_url)
+            summary = map_reduce_and_summarize(plain_text)
+            video_title, video_description, upload_date, duration_string = get_title_and_description(metadata)
+            results.append({
+                'title': video_title,
+                'url': video_url,
+                'upload_date': upload_date,
+                'duration': duration_string,
+                'summary': summary,
+                'description': video_description  
+            })
+        except Exception as e:
+            print(f"Error processing video URL {video_url}: {str(e)}")
+    
+    return results
 
 def extract_metadata(video_url):
-    ydl_opts = {'quiet':True}
+    print(f"Processing video URL: {video_url}")  # Debug print
+    ydl_opts = {'quiet':True, 'extract_flat': True}
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        metadata = ydl.extract_info(video_url, download=False)
-        return metadata
-                    
-def get_subtitle_url(metadata, lang):
+        try:
+            metadata = ydl.extract_info(video_url, download=False)
+            return metadata
+        except Exception as e:
+            print(f"Error processing THIS VIDEO URL!!{video_url}: {e}")
+            return None
+               
+def get_subtitle_url(metadata):
+    lang = "en-US"
     language_codes_to_check = [lang, lang.split('-')[0]]  # Create an array of possible subtitle keywords
     for code in language_codes_to_check:
         if 'automatic_captions' in metadata and code in metadata['automatic_captions']:
@@ -65,6 +91,8 @@ def get_plain_text_from_ttml(url):
     
 def map_reduce_and_summarize(plain_text):
     if plain_text:
+        
+        openaikey = os.environ.get('openaikey')
         llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key=openaikey)
         num_tokens = llm.get_num_tokens(plain_text)
         print (f"Our text has {num_tokens} tokens")
@@ -111,7 +139,6 @@ def get_title_and_description(metadata):
     duration_string = metadata.get('duration_string')
     return video_title, video_description, upload_date, duration_string
 
-
 def save_info(video_url, summary, video_title, video_description, upload_date, duration_string):    
         #Sanitize the video title
         sanitized_video_title = video_title.replace('/','_').replace('\\','_')        
@@ -131,7 +158,8 @@ if __name__ == '__main__':
     
     # Specify the playlist URL and lang
     playlist_url = args.url
-    lang = "en-US"
+    
 
     video_url_list = extract_urls_from_playlist(playlist_url)
-    process_video_url_list(video_url_list, lang)
+    info = process_video_urls(video_url_list)
+    save_info(info)

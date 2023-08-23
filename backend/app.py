@@ -4,6 +4,7 @@ from requests.exceptions import (Timeout, InvalidURL)
 from flask_cors import CORS
 from flask_limiter import Limiter
 from urllib.parse import urlparse
+import tunnelblaster as tb
 
 app = Flask(__name__)
 
@@ -22,22 +23,25 @@ limiter = Limiter( #INCOMING RATE LIMITER
 def check_auth(username, password):
     return username == 'admin' and password == 'secret'
 
-#Configure outgoing permissions
+#Function for checking domain
 ALLOWED_DOMAINS = ["www.youtube.com"]
 def get_domain_from_url(url):
     parsed_url = urlparse(url)
     return parsed_url.netloc
 
+#Function for checking if playlist
+def check_if_playlist(url):
+    parsed_url = urlparse(url)
+    return parsed_url.path == "/playlist"
 
-
-@app.route('/fetch_webpage', methods=['POST'])
+@app.route('/fetch_info', methods=['POST'])
 @limiter.limit("15 per minute")
 def fetch_webpage():
     try:
         #Authenticate
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return jsonify({"error": "Unauthorized"}), 401
+        #auth = request.authorization
+        #if not auth or not check_auth(auth.username, auth.password):
+            #return jsonify({"error": "Unauthorized"}), 401
         
         #Grab Data
         data = request.json
@@ -48,29 +52,23 @@ def fetch_webpage():
         
         #Save url
         url = data['url']
+        print("Processing URL:", url)
 
         #Check if youtube.com
         domain = get_domain_from_url(url)
         if domain not in ALLOWED_DOMAINS:
             return jsonify({'error': 'Domain not allowed'}), 403
         
-        #SCRIPT
-        response = requests.get(url, timeout=10, stream=True)
-        content_length = int(response.headers.get('content-length', 0))
-        if content_length > 3 * 1024 * 1024:  # EXTERNAL SIZE LIMITER
-            return jsonify({'error': 'The content is too large'}), 413
-        response.content # Download and store to response.
-
-        if response.status_code == 200:
-            return jsonify({'content': response.text}), 200
+        #Check whether it is a video or a playlist and then process url
+        results = []
+        if check_if_playlist(url):
+            video_url_list = tb.extract_urls_from_playlist(url)
+            results.extend(tb.process_video_urls(video_url_list))
         else:
-            return jsonify({'error': 'Failed to fetch webpage'}), response.status_code
-    
-    # Network Error Handlers
-    except Timeout:
-        return jsonify({'error': 'Network problem.  Please check your connection.'}), 503
-    except InvalidURL:
-        return jsonify({'error': 'InvalidURL.'}), 400
+            results.extend(tb.process_video_urls(url))
+        return jsonify({'results': results}), 200
+        
+    # Error Handlers
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

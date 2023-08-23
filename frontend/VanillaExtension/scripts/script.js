@@ -20,7 +20,7 @@ async function handleGenerateSummaryButtonClick() {
     console.log(data)
 
     // Send to API using fetch
-    const response = await fetch('http://127.0.0.1:5000/fetch_webpage', {
+    const response = await fetch('http://127.0.0.1:5000/fetch_info', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
