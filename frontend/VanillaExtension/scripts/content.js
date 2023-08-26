@@ -1,25 +1,8 @@
-async function injectDataIntoDOM(data) {
-    try {
-        const tabIdArray = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (tabIdArray.length > 0) {
-            const tabId = tabIdArray[0].id;
-            await chrome.scripting.executeScript({
-                target: { tabId: tabId },
-                function: createDiv,
-                args: [data],
-            });
-        } else {
-            console.error('No active tab found.');
-        }
-    } catch (error) {
-        console.error('Error during DOM injection:', error);
-    }
-}
-
-async function createDiv(data) {
+function createNewDiv() {
     try {
         const newDiv = document.createElement('div');
-        newDiv.textContent = `${data.video_title}, ${data.summary}, ${data.video_duration}`;
+        newDiv.id = 'summaryDiv'
+        newDiv.textContent = 'Summary goes here.'
         newDiv.style.backgroundColor = 'yellow';
         newDiv.style.position = 'fixed';
         newDiv.style.bottom = '0';
@@ -27,22 +10,47 @@ async function createDiv(data) {
         newDiv.style.width = '100%';
         newDiv.style.padding = '10px';
         newDiv.style.zIndex = '9999';
-
-        await new Promise(resolve => {
-            document.body.appendChild(newDiv);
-            resolve();
-        });
+        document.body.appendChild(newDiv);
+        const generateSummaryButton = document.createElement('button');
+        generateSummaryButton.textContent = 'Fetch Summary';
+        generateSummaryButton.style.backgroundColor = 'blue';
+        generateSummaryButton.style.color = 'white';
+        generateSummaryButton.style.padding = '5px 10px';
+        generateSummaryButton.style.border = 'none';
+        generateSummaryButton.style.cursor = 'pointer';
+        generateSummaryButton.addEventListener('click', fetchSummary);
+        newDiv.appendChild(generateSummaryButton);   
     } catch (error) {
-        console.error('Error during div creation:', error);
+            console.error('Error during div creation:', error);
     }
 }
 
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-    if (message.action === 'injectData') {
-        try {
-            await injectDataIntoDOM(message.data);
-        } catch (error) {
-            console.error('Error during data injection:', error);
-        }
+async function fetchSummary() {
+    const currentUrl = window.location.href;
+    const message = {action: 'fetchSummary', url: currentUrl};
+    chrome.runtime.sendMessage(message, handleSummaryPayload); 
     }
-});
+
+function handleSummaryPayload(response) {
+    console.log ("Content script recieved the payload:", response)
+    
+    const firstobject = response.results[0];
+    console.log("The first object looks like this:", firstobject);
+
+    const changeDiv = document.getElementById('summaryDiv');
+    const summary = response.results[0].summary
+    //const formattedSummary = formatSummary(summary);
+    console.log("The summary looks like this:", summary);
+    changeDiv.textContent = summary;
+
+    document.body.appendChild(changeDiv);
+}
+
+function formatSummary(summaryObject) {
+    const formattedSummary = `- ${summaryObject.summary}\n`                      
+    return formattedSummary;
+}
+
+createNewDiv();
+
+

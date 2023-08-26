@@ -9,30 +9,26 @@ async function fetchData(url) {
       body: JSON.stringify({url}),
     });
 
-    // Handle API response
-    const responseData = await response.json();
-    console.log('API response:', responseData);
-    return responseData;
+
+    const payload = await response.json();
+    console.log('API response:', payload);
+    return payload;
   } catch (error) {
     console.error('Error during API call:', error);
     return null;
   }
 }
 
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  if (message.action === 'generateSummary') {
-    try {
-      const responseData = await fetchData(message.url);
-      if (responseData) {
-        const activeTab = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (activeTab.length > 0) {
-          const tabId = activeTab[0].id;
-          // Place the sendMessage call here, after responseData is available
-          chrome.tabs.sendMessage(tabId, { action: 'injectData', data: responseData });
-        }
-      }
-    } catch (error) {
-      console.error('Error during generateSummary:', error);
-    }
+chrome.runtime.onMessage.addListener ((message, sender, sendResponse) => {
+  processRequest(message).then(sendResponse);
+  return true;
+  });
+
+async function processRequest(message){
+  if (message.action === 'fetchSummary'){
+    const url = message.url;
+    const responseData = await fetchData(url)
+    console.log("Sending response data:", responseData);
+    return responseData;
   }
-});
+}
