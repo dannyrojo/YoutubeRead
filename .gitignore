@@ -6,3 +6,4 @@ github.pub
 .env
 loadkeys.sh
 __pycache__
+frontend/test

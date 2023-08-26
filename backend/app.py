@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify, abort
 import requests
+from urllib.parse import urlparse
 from requests.exceptions import (Timeout, InvalidURL)
 from flask_cors import CORS
 from flask_limiter import Limiter
-from urllib.parse import urlparse
 import tunnelblaster as tb
 
 app = Flask(__name__)
@@ -28,11 +28,6 @@ ALLOWED_DOMAINS = ["www.youtube.com"]
 def get_domain_from_url(url):
     parsed_url = urlparse(url)
     return parsed_url.netloc
-
-#Function for checking if playlist
-def check_if_playlist(url):
-    parsed_url = urlparse(url)
-    return parsed_url.path == "/playlist"
 
 @app.route('/fetch_info', methods=['POST'])
 @limiter.limit("15 per minute")
@@ -60,12 +55,7 @@ def fetch_webpage():
             return jsonify({'error': 'Domain not allowed'}), 403
         
         #Check whether it is a video or a playlist and then process url
-        results = []
-        if check_if_playlist(url):
-            video_url_list = tb.extract_urls_from_playlist(url)
-            results.extend(tb.process_video_urls(video_url_list))
-        else:
-            results.extend(tb.process_video_urls(url))
+        results = tb.process_url(url)
         return jsonify({'results': results}), 200
         
     # Error Handlers

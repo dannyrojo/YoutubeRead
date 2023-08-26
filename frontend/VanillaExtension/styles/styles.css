@@ -19,3 +19,17 @@ body {
     color: #666;
   }
   
+  #sidePanel {
+    position: fixed;
+    bottom: -100%; /* Initially off-screen */
+    left: 0;
+    width: 100%;
+    height: 70%; /* Adjust as needed */
+    background-color: #fff;
+    transition: bottom 0.3s ease-in-out;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
