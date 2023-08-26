@@ -45,6 +45,7 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 2. Load the extension into chrome:
     -Open chrome and turn on developer mode for extension, and click "load unpacked"
     -Load the contents of frontend/VanillaExtension
+    -**Important** You may need to change the chrome-extension://EXTENSIONIDHERE in the appy.py file, after you load the extension look for the extension ID.  I'll figure out a way to do this programatically in the next update. __sorry__
 
 3. Fetch summary:
     - Navigate to any youtube video and you will see a yellow bar at the bottom of the page
