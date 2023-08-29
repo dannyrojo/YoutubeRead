@@ -1,5 +1,5 @@
 test_scripts/scriptsvenv
-backend/venv/
+backend/backendvenv/
 frontend/venv
 github
 github.pub
@@ -7,3 +7,4 @@ github.pub
 loadkeys.sh
 __pycache__
 frontend/test
+background_copy.js

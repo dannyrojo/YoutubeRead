@@ -8,9 +8,9 @@ import tunnelblaster as tb
 
 app = Flask(__name__)
 
-#Configure app-level permissions
-
-CORS(app, origins=["chrome-extension://ahaeigklbfodjikacnfinmladbogkcla"]) #ORIGIN
+#CORS Configurations (should secure more)
+CORS(app, resources={r"/conf_CORS": {"origins": "*"},
+                    r"/fetch_info": {"origins": "*"}})
 
 app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024  #INCOMING SIZE LIMITER
 
@@ -19,25 +19,18 @@ limiter = Limiter( #INCOMING RATE LIMITER
     default_limits=["100 per day","100 per hour"]
 )
 
-#Configure user permissions 
-def check_auth(username, password):
-    return username == 'admin' and password == 'secret'
-
-#Function for checking domain
+#Function for checking URL
 ALLOWED_DOMAINS = ["www.youtube.com"]
 def get_domain_from_url(url):
     parsed_url = urlparse(url)
     return parsed_url.netloc
 
+
 @app.route('/fetch_info', methods=['POST'])
 @limiter.limit("15 per minute")
 def fetch_webpage():
     try:
-        #Authenticate
-        #auth = request.authorization
-        #if not auth or not check_auth(auth.username, auth.password):
-            #return jsonify({"error": "Unauthorized"}), 401
-        
+
         #Grab Data
         data = request.json
         

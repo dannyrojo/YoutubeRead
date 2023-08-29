@@ -17,7 +17,8 @@
     ],
 
     "background": {
-      "service_worker": "scripts/background.js"
+      //"service_worker": "scripts/background.js"  //CHROME
+      "scripts": ["scripts/background.js"] //FIREFOX
     }
 
     
