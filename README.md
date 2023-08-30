@@ -8,11 +8,18 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 
 ## Features
 
+- **Script or Extension**
+    - Run either a script in the terminal (see test_scripts)
+    - Or use it as a browser extension!
+
 - **Automatic Summarization**: 
-    - Extract the most relevant content without manual input.
+    - Extract the most relevant content without manual input!  
 
 - **Summarization Types**:  
-    - Use _tunnelblaster_ to bounce down either a single URL or playlsit!  
+    - Use _tunnelblaster_ to bounce down either a single URL or playlist!  
+
+- **Side Panel** 
+    - For easy navigation!
 
 ## Setup and Use  (tl;dr Fire up the backend server with app.py, Adjust the manifest for chrome or firefox, load the extension in browser, go to youtube)
 
@@ -31,17 +38,17 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 
 2. Install the dependencies:
     - Navigate to the backend folder (and create a virtual environment if you want with "python3 -m venv nameofvenv")
-    - pip install -r requirements.txt
+    - pip install -r requirements.txt 
 
 3. Run the test_scripts 
-    - Navigate to the test_scripts folder, these are fully functioning  
-    - python3 yt_summarizer.py https://YOUTUBEURL.com
-    - These will download to the test_scripts folder
+    - Navigate to the test_scripts folder, these are fully functioning with either a single video or a whole playlist.
+    - python3 tunnelblaster.py https://www.YOUTUBEURL.com/watch?=aslifjasfl  (replace with your URL)
+    - The results will download to the test_scripts folder
 
 -   **Setting up the browser extension**
 
 1. Start the backend server:
-    -Navigate to the backend folder and run app.py after installing requirements.txt (see instructions for running Python Scripts)
+    -Navigate to the backend folder and run app.py after installing dependencies (see instructions for installing dependencies above)
 
 2. Load the extension **Important -- You need to adjust the manifest.json file to run the background scripts**
     - Check the manifest.json file and adjust the background scripts setting.  Chrome uses service-workers, firefox does not. Comment out one you don't use.
