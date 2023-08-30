@@ -11,10 +11,8 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 - **Automatic Summarization**: 
     - Extract the most relevant content without manual input.
 
-- **Multiple Summarization Types**:  
-    - Use _jargoner_ for brand new topics you've never heard of.  Extracts key terms and defines them.  
-    - Use  _howtutor_ to extract a step by step instructions.  (needs some work)
-    - Use _tunnelblaster_ to bounce down an entire playlist using the _ytsummarizer_.  Make sure you use a playlist URL.
+- **Summarization Types**:  
+    - Use _tunnelblaster_ to bounce down either a single URL or playlsit!  
 
 ## Setup and Use  (tl;dr Fire up the backend server with app.py, Adjust the manifest for chrome or firefox, load the extension in browser, go to youtube)
 

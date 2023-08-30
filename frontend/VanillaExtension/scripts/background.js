@@ -28,7 +28,9 @@ async function processRequest(message){
   if (message.action === 'fetchSummary'){
     const url = message.url;
     const responseData = await fetchData(url)
+    chrome.runtime.sendMessage({action: 'updateSidePanel', info: responseData}); //Send payload over to the sidepanel!
     console.log("Sending response data:", responseData);
     return responseData;
   }
 }
+

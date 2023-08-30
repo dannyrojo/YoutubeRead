@@ -43,7 +43,6 @@ function increaseTextSize() {
 }
 
 
-
 async function fetchSummary() {
     const currentUrl = window.location.href;
     const message = {action: 'fetchSummary', url: currentUrl};
