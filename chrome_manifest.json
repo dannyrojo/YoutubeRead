@@ -7,7 +7,7 @@
     
     "description": "Too long, didn't watch",
     
-    "permissions": ["scripting", "activeTab", "tabs", "sidePanel"],
+    "permissions": ["scripting", "activeTab", "tabs", "storage", "sidePanel"],
 
     "content_scripts":[
       {
@@ -17,14 +17,15 @@
     ],
 
     "background": {
-      "service_worker": "scripts/background.js"  //CHROME
-      //"scripts": ["scripts/background.js"] //FIREFOX
+      "service_worker": "scripts/background.js"
+      
     },
 
     "side_panel":{
       "default_path": "sidepanel/sidepanel.html",
       "width": 300
     }
+
     
   }
   

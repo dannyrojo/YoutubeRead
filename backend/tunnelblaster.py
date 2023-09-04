@@ -11,32 +11,7 @@ from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-def process_url(input):
-    results = [] # Container for the information
-    if check_if_playlist(input): 
-        list_of_urls = extract_urls_from_playlist(input) # If url is a playlist, create an array of urls
-    else:
-        list_of_urls = [input] # If it is not a playlist then wrap the url into an array
-    for video_url in list_of_urls: # Run the extractor for all the urls
-        try:
-            metadata = extract_metadata(video_url)
-            subtitle_url = get_subtitle_url(metadata)
-            print("Is this subtitle_url working?:", subtitle_url)
-            plain_text = get_plain_text_from_ttml(subtitle_url)
-            summary = map_reduce_and_summarize(plain_text)
-            video_title, video_description, upload_date, duration_string = get_title_and_description(metadata)
-            results.append({
-                'title': video_title,
-                'url': video_url,
-                'upload_date': upload_date,
-                'duration': duration_string,
-                'summary': summary,
-                'description': video_description  
-            })
-        except Exception as e:
-            print(f"Error processing video URL {video_url}: {str(e)}")
-    return results
-
+# Functions for extracting an array of urls from a playlist (or single video)
 def check_if_playlist(input):
     parsed_url = urlparse(input)
     return parsed_url.path == "/playlist"
@@ -53,10 +28,19 @@ def extract_urls_from_playlist(input):
                 video_url = entry['url']
                 list_of_urls.append(video_url)
     except yt_dlp.utils.DownloadError as e:
-        print(f"Error extracting playlist: {str(e)}")
+        print(f"TB error extracting playlist: {str(e)}")
     return list_of_urls
 
-def extract_metadata(video_url):
+def process_host_url (input):  #function for API endpoint
+    if check_if_playlist(input): 
+        url_array = extract_urls_from_playlist(input) # If url is a playlist, create an array of urls
+    else:
+        url_array = [input] # If it is not a playlist then wrap the url into an array
+    print("This is the array of urls (url_array):", url_array)
+    return url_array
+
+# Functions for extracting a summary from an url
+def extract_metadata(video_url): #yt-dlp
     print(f"Processing video URL: {video_url}")  # Debug print
     ydl_opts = {'quiet':True}
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -67,7 +51,7 @@ def extract_metadata(video_url):
             print(f"Error extracting metadata for the following: {video_url}: {e}")
             return None
                
-def get_subtitle_url(metadata):
+def get_subtitle_url(metadata): #yt-dlp
     #print("This is the metadata:", metadata)
     lang = "en-US"
     language_codes_to_check = [lang, lang.split('-')[0]] 
@@ -84,7 +68,7 @@ def get_subtitle_url(metadata):
         print("No subtitles found")
     return None  # Return None if URL not found
                 
-def get_plain_text_from_ttml(url):
+def get_plain_text_from_ttml(url): #parser
     print("This is the URL being bassed to the get_plain_text_from_ttml:", url)
     if url:    
         response = requests.get(url)
@@ -99,7 +83,7 @@ def get_plain_text_from_ttml(url):
         print("No valid URL for captions available.")
     return None
     
-def map_reduce_and_summarize(plain_text):
+def map_reduce_and_summarize(plain_text): #langchain API
     if plain_text:
         
         openaikey = os.environ.get('openaikey')
@@ -143,12 +127,31 @@ def map_reduce_and_summarize(plain_text):
         summary = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \n\n No valid captions for this video, so no summary.  WOMP WOMP WOMP \n\n !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         return summary
     
-def get_title_and_description(metadata):
+def get_title_and_description(metadata): #yt-dlp
     video_title = metadata.get('title')
     video_description = metadata.get('description')
     upload_date = metadata.get('upload_date')
     duration_string = metadata.get('duration_string')
     return video_title, video_description, upload_date, duration_string
+
+def process_video_url(input):  #function for API endpoint
+    try:
+        metadata = extract_metadata(input)
+        subtitle_url = get_subtitle_url(metadata)
+        plain_text = get_plain_text_from_ttml(subtitle_url)
+        summary = map_reduce_and_summarize(plain_text)
+        video_title, video_description, upload_date, duration_string = get_title_and_description(metadata)
+        summary = {
+            'title': video_title,
+            'url': input,
+            'upload_date': upload_date,
+            'duration': duration_string,
+            'summary': summary,
+            'description': video_description  
+        }
+        return summary
+    except Exception as e:
+        print(f"Error processing video URL {input}: {str(e)}")
 
 def save_info(url, summary, title, description, upload_date, duration):    
         # Weird characters be gone (causing issues with "oepn" method)!
@@ -170,18 +173,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     url = args.url
     
-    # Get the array of objects
-    results = process_url(url)
-
-    # And then process them
-    for result in results:
-        save_info(result["url"],
-                  result["summary"],
-                  result["title"],
-                  result["description"],
-                  result["upload_date"],
-                  result["duration"]
-                  )
-
+    # Broke the script, fix the argument parser later
     
     
