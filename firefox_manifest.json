@@ -7,7 +7,7 @@
     
     "description": "Too long, didn't watch",
     
-    "permissions": ["scripting", "activeTab", "storage", "tabs", "sidePanel"],
+    "permissions": ["scripting", "activeTab", "storage", "tabs"],
 
     "content_scripts":[
       {
