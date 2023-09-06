@@ -1,0 +1,31 @@
+body {
+background-color: #f5f5f5;
+width: 400px;
+}
+
+/* Style for the container */
+#configurationForm {
+background-color: #ffffff;
+
+}
+
+/* Style for the textarea */
+#configurationText {
+resize:none;
+width: 100%;
+}
+
+/* Style for the submit button */
+#submitOptionsButton {
+background-color: #007bff;
+}
+
+#submitOptionsButton:hover {
+background-color: #0056b3;
+}
+
+/* Center the submit button */
+#submitOptions {
+justify-content: center;
+}
+  

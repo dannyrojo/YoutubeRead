@@ -3,11 +3,11 @@
     
     "name": "YoutubeRead",
     
-    "version": "0.5",
+    "version": "0.7",
     
     "description": "Too long, didn't watch",
     
-    "permissions": ["scripting", "activeTab", "tabs", "storage", "sidePanel"],
+    "permissions": ["scripting", "activeTab", "tabs", "storage", "sidePanel", "downloads"],
 
     "content_scripts":[
       {
@@ -24,8 +24,15 @@
     "side_panel":{
       "default_path": "sidepanel/sidepanel.html",
       "width": 300
-    }
+    },
 
-    
+    "action": {
+      "default_icon": {
+        "16": "icons/YoutubeRead16.png",
+        "32":"icons/YoutubeRead32.png"
+      },
+      "default_title":"Options",
+      "default_popup":"popup/popup.html"
+    }
   }
   

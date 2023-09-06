@@ -6,6 +6,7 @@ function createSidePanelListeners() { // Create the Event Listeners for Buttons
       document.getElementById('prev-button').addEventListener('click', navigatePrevious);
       document.getElementById('next-button').addEventListener('click', navigateNext);
       document.getElementById('container-dropdown').addEventListener('change', changeContainer);
+      document.getElementById('download-info-button').addEventListener('click', downloadCurrentInfo);
       } catch (error) {
           console.error('Event Listeners Missing:', error);
   }
@@ -94,6 +95,28 @@ function showCurrentObjectInDom(input) { // A function for displaying the approp
   console.log("SHOWING NEW OBJECT WITH NEW INDEX, CURRENTINDEX", currentObjectIndex);
 }
 
+/* DROP DOWN */
+
+function populateDropdownOptions(){
+  const dropdown = document.getElementById('container-dropdown');
+  dropdown.innerHTML = '';
+  const containers = document.querySelectorAll('.info-entry');
+  containers.forEach((container, index) => {
+    const option = document.createElement('option');
+    option.value = index;
+    option.text = `Container ${index}`;
+    dropdown.appendChild(option);
+    console.log("New option added:", option.text);
+  });
+}
+function changeContainer(){
+  const dropdown = document.getElementById('container-dropdown');
+  const selectedIndex = parseInt(dropdown.value, 10); // Don't forget to convert to Integer!  Dropdownw options only do strings.
+  currentObjectIndex = selectedIndex;
+  console.log("The dropdown was clicked and the selectedIndex was set to:", selectedIndex);
+  showCurrentObjectInDom(currentObjectIndex);
+}
+
 /* STORAGE FUNCTIONS */
 
 async function storeUrlListToSession(input) {
@@ -130,27 +153,55 @@ async function storeVideoInformationToSession(input){  //should change to sessio
     });
 }
 
-/* DROP DOWN */
+/* DOWNLOAD FUNCTIONS */
 
-function populateDropdownOptions(){
-  const dropdown = document.getElementById('container-dropdown');
-  dropdown.innerHTML = '';
-  const containers = document.querySelectorAll('.info-entry');
-  containers.forEach((container, index) => {
-    const option = document.createElement('option');
-    option.value = index;
-    option.text = `Container ${index}`;
-    dropdown.appendChild(option);
-    console.log("New option added:", option.text);
-  });
+async function downloadAllInfo(){
+  //grab from storage
+  chrome.storage.session.get(["storedVideoInfo"]).then((result) => {
+      const storedData = result.storedVideoInfo;
+      //identify index and pull object
+      const index = currentObjectIndex;
+      const info = storedData[index];
+      console.log("THIS IS THE INFO PULLED FOR DOWNLOADING:", info);
+      // convert to text by mapping and joining
+      var markdownText = info.map(function(object){
+        return `- **Title**: ${object.title}\n  **URL**: ${object.url}\n **Upload Date**: ${object.upload_date}\n **Duration**:${object.duration}\n **Summary**:${object.summary}\n **Description**:${object.summary}\n`;
+      }).join('\n\n');
+      var blob = new Blob([markdownText], {type: 'text/markdown'}); 
+      var url = URL.createObjectURL(blob);
+      chrome.downloads.download({
+        url: url,
+        filename: 'data.md',
+        saveAs:true
+      }, function(){URL.revokeObjectURL(url);
+      })
+    });}
+async function downloadCurrentInfo(){
+  //grab from storage
+  chrome.storage.session.get(["storedVideoInfo"]).then((result) => {
+      const storedData = result.storedVideoInfo;
+      //identify index and pull object
+      const index = currentObjectIndex; //defined globally
+      const info = storedData[index];
+      console.log("THIS IS THE INFO PULLED FOR DOWNLOADING:", info);
+      // convert to string
+      var markdownText = `- **Title**: ${info.title}\n  **URL**: ${info.url}\n **Upload Date**: ${info.upload_date}\n **Duration**: ${info.duration}\n **Summary**: ${info.summary}\n **Description**: ${info.description}\n`;
+      //make the binary
+      var blob = new Blob([markdownText], {type: 'text/markdown'}); 
+      // create a link
+      var url = URL.createObjectURL(blob);
+      //download the binary and clear the link
+      chrome.downloads.download({
+        url: url,
+        filename: `${info.title}`,
+        saveAs:true  // for a menu popup
+      }, function(){URL.revokeObjectURL(url);
+      })
+    });
 }
-function changeContainer(){
-  const dropdown = document.getElementById('container-dropdown');
-  const selectedIndex = parseInt(dropdown.value, 10); // Don't forget to convert to Integer!  Dropdownw options only do strings.
-  currentObjectIndex = selectedIndex;
-  console.log("The dropdown was clicked and the selectedIndex was set to:", selectedIndex);
-  showCurrentObjectInDom(currentObjectIndex);
-}
+
+/* CONFIGURATION OPTIONS */
+
 
 /* FETCHING FUNCTIONS */
 

@@ -1,4 +1,4 @@
-# YouTube Video Summarizer
+# YouTubeRead 0.7
 
 A personal project that extracts key information from YouTube videos and provides concise summaries.
 
@@ -8,8 +8,8 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 
 ## Features
 
-- **Script or Extension**
-    - Run either a script in the terminal (see test_scripts)
+- **~~Script~~ or Extension**
+    - ~~Run either a script in the terminal (see test_scripts)~~  (BROKEN WHILE I UPDATE TUNNELBLASTER LOGIC)
     - Or use it as a browser extension!
 
 - **Automatic Summarization**: 
@@ -19,9 +19,22 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     - Use _tunnelblaster_ to bounce down either a single URL or playlist!  
 
 - **Side Panel** 
-    - For easy navigation!
+    - Information is now on the sidepanel, (or in firefox, the sidebar *ctrl+B*)
+    - Now a dropdown menu for easy navigation!
 
-## Setup and Use  (tl;dr Fire up the backend server with app.py, Adjust the manifest for chrome or firefox, load the extension in browser, go to youtube)
+- **Download Information**
+    - Save the information to your PC
+    - Saves as a markdown file
+    - All summaries will be saved in browser for the ***session only***
+
+- **COMING SOON**
+    - Configuration options will be places on the action popup so you can adjust the summary parameters
+    - Configuration options will be synced across all devices
+    - QOL functions such as font changing, display options such as summary only
+    - DOT ENV for easy storing of APIKEY
+
+## Setup and Use  
+<sub>(tl;dr Fire up the backend server with app.py, Place the appropriate manifest in the Extension Folder, load the extension in browser, open up sidepanel and go to a youtube page)</sub>
 
 -   **Get OpenAI API**
 
@@ -31,39 +44,46 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 2. Set environment key:
     - In the terminal where you are running the scripts or app.py "export openaikey=YOURKEYHERE"
 
--   **Running the Python Scripts**
+-   **Install the Dependencies**
 
 1. Clone this repository:
     - git clone https://github.com/dannyrojo/YoutubeRead.git
 
 2. Install the dependencies:
-    - Navigate to the backend folder (and create a virtual environment if you want with "python3 -m venv nameofvenv")
+    - Navigate to "YoutubeRead/backend/"
+    - (optional) create a virtual environment if you want with "python3 -m venv nameofvenv"
     - pip install -r requirements.txt 
 
-3. Run the test_scripts 
-    - Navigate to the test_scripts folder, these are fully functioning with either a single video or a whole playlist.
-    - python3 tunnelblaster.py https://www.YOUTUBEURL.com/watch?=aslifjasfl  (replace with your URL)
-    - The results will download to the test_scripts folder
+3. ~~Run the test_scripts ~~
+    - ~~Navigate to the test_scripts folder, these are fully functioning with either a single video or a whole playlist.~~
+    - ~~python3 tunnelblaster.py https://www.YOUTUBEURL.com/watch?=aslifjasfl  (replace with your URL)~~
+    - ~~The results will download to the test_scripts folder~~
 
--   **Setting up the browser extension**
+-   **Start the Backend Server**
 
-1. Start the backend server:
-    -Navigate to the backend folder and run app.py after installing dependencies (see instructions for installing dependencies above)
+1.  Fire up the backend server:
+    -In the backend folder run app.py ***(python3 app.py)***
 
-2. Load the extension **Important -- You need to adjust the manifest.json file to run the background scripts**
-    - Check the manifest.json file and adjust the background scripts setting.  Chrome uses service-workers, firefox does not. Comment out one you don't use.
+-   **Install and Use the Extension**
+
+1. Check the manifest file **Important -- MV3 requires different syntax for different browsers, choose the appropriate one!**
+    - Go to manifest folder and pick chrome or firefox manifest.  Rename it to *manifest.json* 
+    - Place the manifest in the root of VanillaExtension folder and delete any other manifests there.
+
+2. Load the extension in your browser  
         
-        __Chrome__:
+        Chrome:
     -Open chrome and turn on developer mode for extension, and click "load unpacked"
     -Load the contents of frontend/VanillaExtension
-    -Navigate to any youtube page and you will see a yellow bar with a blue button at the bottom of the page.  Wait for the summary to be fetched (10 seconds)
+    -Click the sidebar button (looks like a shaded rectangle in a square) at the top right of the browser
+    -Click on the dropdown menu and select "YoutubeRead"
+    -Navigate to a youtube video or playlist and click "Fetch Info"
 
-        __Firefox__:
-    - Go to "about:debugging" in the navigator and load a temporary extension.   Select the manifest.json file in the VanillaExtension folder.
-    - Navigate to any youtube video then click the extension button
-    - Click fetch summary and wait 10 seconds
-
-
+        Firefox:  
+    - FYI: (Unfortunately, you will have to install this everytime you load up firefox, due to security) - If you know a workaround, let me know!
+    - Go to "about:debugging" in the navigator and load a temporary extension.   Select the manifest.json *(make sure to select the correct one)* in the VanillaExtension folder.
+    - Navigate to any youtube video then click the extension button at the top of the browser (it looks like a puzzle piece), *make sure to give permission to firefox!*
+    - Open the side bar with "ctrl+B" and click "fetch info"
 
 ## Contributing
 

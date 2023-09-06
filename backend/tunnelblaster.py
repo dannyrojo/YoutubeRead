@@ -52,7 +52,6 @@ def extract_metadata(video_url): #yt-dlp
             return None
                
 def get_subtitle_url(metadata): #yt-dlp
-    #print("This is the metadata:", metadata)
     lang = "en-US"
     language_codes_to_check = [lang, lang.split('-')[0]] 
     for code in language_codes_to_check:
@@ -66,10 +65,9 @@ def get_subtitle_url(metadata): #yt-dlp
                     return sub['url']
     else:
         print("No subtitles found")
-    return None  # Return None if URL not found
+    return None  
                 
 def get_plain_text_from_ttml(url): #parser
-    print("This is the URL being bassed to the get_plain_text_from_ttml:", url)
     if url:    
         response = requests.get(url)
         if response.status_code == 200:
@@ -86,33 +84,31 @@ def get_plain_text_from_ttml(url): #parser
 def map_reduce_and_summarize(plain_text): #langchain API
     if plain_text:
         
+        #Configure langchain
         openaikey = os.environ.get('openaikey')
         llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key=openaikey)
         num_tokens = llm.get_num_tokens(plain_text)
         print (f"Our text has {num_tokens} tokens")
 
+        #Split the text into chunks (overlap is too high)
         text_splitter = RecursiveCharacterTextSplitter(separators=[" "], chunk_size=10000, chunk_overlap=500)
         docs = text_splitter.create_documents([plain_text])
-        
-        num_docs = len(docs)
-        num_tokens_first_document = llm.get_num_tokens(docs[0].page_content)
-        num_tokens_last_document = llm.get_num_tokens(docs[-1].page_content)
-        print (f"Now we have {num_docs} documents and the first one has {num_tokens_first_document} tokens, and the last one has {num_tokens_last_document}")
-        
-    
+
+        #Create prompts for map/reduce   
         map_prompt = """
-        Write a concise summary of the following: 
+        Please summarize the following text while still keeping many of the important details: 
         "{text}"
-        SUMMARY:
         """
-        map_prompt_template = PromptTemplate(template=map_prompt, input_variables=["text"])
+        map_prompt_template = PromptTemplate(template=map_prompt, input_variables=["text"])    
         
         combine_prompt = """
-        Write a concise summary of the following text delimited by triple backquotes.  Return your response in bullet points which covers the key points of the text.
-        '''{text}'''
-        MAIN POINTS:
+        Please write a concise summary of the following text:
+        "{text}"
+        
         """
         combine_prompt_template = PromptTemplate(template=combine_prompt, input_variables=["text"])
+        
+        #Define chain type, run, return
         summary_chain = load_summarize_chain(llm=llm,
                                             chain_type='map_reduce',
                                             map_prompt=map_prompt_template,
@@ -124,7 +120,7 @@ def map_reduce_and_summarize(plain_text): #langchain API
         return summary
     else:
         print("No valid plain text content available for summarization.")
-        summary = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \n\n No valid captions for this video, so no summary.  WOMP WOMP WOMP \n\n !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        summary = "!!!!!!!!!!!!!!!!ERROR!!!!!!!!!!!!!!!!!! \n\n No valid captions for this video, so no summary.  WOMP WOMP WOMP \n\n !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         return summary
     
 def get_title_and_description(metadata): #yt-dlp
