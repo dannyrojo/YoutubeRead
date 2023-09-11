@@ -4,96 +4,99 @@ A personal project that extracts key information from YouTube videos and provide
 
 ## Description
 
-Inspired by countless hours of scrolling through Youtube videos trying to find that thing I forgot.  This tool captures the auto-generated captions from Youtube videos and processes them using ChatGPT.  
+Inspired by countless hours of scrolling through Youtube videos trying to find that thing I forgot.  This tool captures the auto-generated captions from Youtube videos and processes them using ChatGPT.  Use the browser's native popup button to open an options page.  Configure your prompts and fetch summaries based on those prompts using the browser's native sidepanel (or in firefox, sidebar)
 
 ## Features
 
-- **~~Script~~ or Extension**
-    - ~~Run either a script in the terminal (see test_scripts)~~  (BROKEN WHILE I UPDATE TUNNELBLASTER LOGIC)
-    - Or use it as a browser extension!
-
-- **Automatic Summarization**: 
-    - Extract the most relevant content without manual input!  
-
-- **Summarization Types**:  
-    - Use _tunnelblaster_ to bounce down either a single URL or playlist!  
+- **Configuration Options**
+    - Action popup now allows you to adjust the chat prompt!  
+    - This is synced across all devices!
+    - Click the puzzle piece in the corner of your browser.
 
 - **Side Panel** 
     - Information is now on the sidepanel, (or in firefox, the sidebar *ctrl+B*)
-    - Now a dropdown menu for easy navigation!
-
-- **Download Information**
-    - Save the information to your PC
-    - Saves as a markdown file
-    - All summaries will be saved in browser for the ***session only***
-
-- **Configuration Options**
-    - Action popup now allows you to adjust the chat prompt!
-    - This is synced across all devices!
+    - Now a dropdown menu for to store your summaries for the session!
 
 - **State Management**
-    - State is saved within session!  Open and close the sidebar with security.
+    - State is saved within session! (*warning: will delete if you close browser*)  
 
+- **Download Information**
+    - Save any summary to your PC
+    - Saves as a markdown file
+   
 - **DOTENV**
     - Store your API safely in a .env file in the root directory
 
-- **COMING SOON**
-    - QOL functions such as font changing, display options such as summary only
-    - Bug testing
+- **Coming soon**
+    - Style functions such as font changing and display options
+    - Bug fixes
 
 ## Setup and Use  
-<sub>(tl;dr Fire up the backend server with app.py, Place the appropriate manifest in the Extension Folder, load the extension in browser, open up sidepanel and go to a youtube page)</sub>
+<sub>tl;dr Install dependencies with "pip install -r requirements". Put the api key into ".env" file in root.  Fire up the backend server with "python3 app.py". Copy and rename manifest file for specific browser, chrome or firefox. Load the extension into your browser. Configure with popup action (puzzle).  Fetch info with sidepanel (ctrl+B in firefox).</sub>
 
--   **Get OpenAI API**
+1.   **Install the Dependencies**
 
-1. Subscribe to openAI API and create API key:
-    - Subscribe at https://openai.com/blog/openai-api
-    - Create an API key
-2. Set environment key:
-    - Create a file named ".env" in the root directory of this project.  
-    - In this file write "openaikey=YOURKEYHERE" on the first line
-
--   **Install the Dependencies**
-
-1. Clone this repository:
+- Clone this repository:
     - git clone https://github.com/dannyrojo/YoutubeRead.git
 
-2. Install the dependencies:
+- Install the dependencies:
     - Navigate to "YoutubeRead/backend/"
     - (optional) create a virtual environment if you want with "python3 -m venv nameofvenv"
     - pip install -r requirements.txt 
 
-3. ~~Run the test_scripts ~~
-    - ~~Navigate to the test_scripts folder, these are fully functioning with either a single video or a whole playlist.~~
-    - ~~python3 tunnelblaster.py https://www.YOUTUBEURL.com/watch?=aslifjasfl  (replace with your URL)~~
-    - ~~The results will download to the test_scripts folder~~
+2.   **Get OpenAI API**
 
--   **Start the Backend Server**
+- Subscribe to openAI API and create API key:
+    - Subscribe at https://openai.com/blog/openai-api
+    - Create an API key
+- Set environment key:
+    - Create a file named ".env" in the root directory of this project.  
+    - In this file write "openaikey=YOURKEYHERE" on the first line
 
-1.  Fire up the backend server:
-    -In the backend folder run app.py ***(python3 app.py)***
+3.   **Start the Backend Server**
 
--   **Install and Use the Extension**
+-  Fire up the backend API:
+    - Navigate to the backend folder 
+    - Start up the server "python3 app.py"
 
-1. Check the manifest file **Important -- MV3 requires different syntax for different browsers, choose the appropriate one!**
+4.    **Install the Extension**
+<sub>The manifest file is the director for most browser extension configurations.  Chrome and firefox converge on most manifest keywords, however in Manifest V3, many are still being phased in and out.  This means that for the time being we will need to have separate manifest files for each browser.  If you know a work around for this, please let me know!</sub>
+
+- Check the manifest file **Important** 
     - Go to manifest folder and pick chrome or firefox manifest.  Rename it to *manifest.json* 
-    - Place the manifest in the root of VanillaExtension folder and delete any other manifests there.
+    - Place the manifest in the root of VanillaExtension folder and delete any other manifests there. (There can be only one!)
 
-2. Load the extension in your browser  
+- Load the extension in your browser  
         
     Chrome:
     - Open chrome and turn on developer mode for extension, and click "load unpacked"
     - Load the contents of frontend/VanillaExtension
-    - Click the sidebar button (looks like a shaded rectangle in a square) at the top right of the browser
-    - Click on the dropdown menu and select "YoutubeRead"
-    - Set your configuration in the extension popup (puzzle piece at the top of the browser)
-    - Navigate to a youtube video or playlist and click "Fetch Info"
 
     Firefox:  
     - FYI: (Unfortunately, you will have to install this everytime you load up firefox, due to security) - If you know a workaround, let me know!
     - Go to "about:debugging" in the navigator and load a temporary extension.   Select the manifest.json *(make sure to select the correct one)* in the VanillaExtension folder.
-    - Navigate to any youtube video then click the extension button at the top of the browser (it looks like a puzzle piece), *make sure to give permission to firefox!*
-    - Open the side bar with "ctrl+B" and click "fetch info"
+    
+5.  ** Use the Extension**
+
+    Chrome: 
+    - The popup action is a native button that looks like a puzzle piece in the top right.  Configure and set your prompts here.  You can add and remove prompts.  If you remove all prompts, next session will sync to the default prompt.   
+    - Click the sidebar button (looks like a square with a sidebar) at the top right of the browser to open up the information display.
+    - Click on the dropdown menu and select "YoutubeRead"
+    - Navigate to a youtube video or playlist and click "Fetch Info"
+
+
+    Firefox:
+    - Firefox has security settings in place, click the native popup action (puzzle peice) at the top right to give permission to the extension.
+    - The popup action will also allow you to configure you prompts.  If you remove all prompts, the next session will default to the original prompts.
+    - After navigating to a youtube video or playlist, open the side bar with "ctrl+B" and click "fetch info"
+
+# Configuring the Prompts
+
+The popup action will allow you to set your prompts.  I suggest the following format
+        Map:  Please write a concise summary of the following:
+        Reduce:  Please write a concise summary of the following:
+
+This seems to be the quickest way to get a summary. If you would like to try different prompts, remember that the mapping phase seems to be the bottleneck.  If you write something like Map: "Rewrite the following text with only minor grammatical or syntatical changes" you can preserve most of the text, however, it will be a pretty slow turnaround.  Additionally, if you want to filter the results, use the Reduce prompt as a filter, like this, Reduce: "List and define important keywords related to machine learning in the following text:"
 
 ## Contributing
 
