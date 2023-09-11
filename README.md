@@ -81,14 +81,16 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 
 2. Load the extension in your browser  
         
-        Chrome:    - Open chrome and turn on developer mode for extension, and click "load unpacked"
+    Chrome:
+    - Open chrome and turn on developer mode for extension, and click "load unpacked"
     - Load the contents of frontend/VanillaExtension
     - Click the sidebar button (looks like a shaded rectangle in a square) at the top right of the browser
     - Click on the dropdown menu and select "YoutubeRead"
     - Set your configuration in the extension popup (puzzle piece at the top of the browser)
     - Navigate to a youtube video or playlist and click "Fetch Info"
 
-        Firefox:      - FYI: (Unfortunately, you will have to install this everytime you load up firefox, due to security) - If you know a workaround, let me know!
+    Firefox:  
+    - FYI: (Unfortunately, you will have to install this everytime you load up firefox, due to security) - If you know a workaround, let me know!
     - Go to "about:debugging" in the navigator and load a temporary extension.   Select the manifest.json *(make sure to select the correct one)* in the VanillaExtension folder.
     - Navigate to any youtube video then click the extension button at the top of the browser (it looks like a puzzle piece), *make sure to give permission to firefox!*
     - Open the side bar with "ctrl+B" and click "fetch info"
