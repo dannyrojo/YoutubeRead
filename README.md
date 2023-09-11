@@ -23,12 +23,17 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 - **Download Information**
     - Save any summary to your PC
     - Saves as a markdown file
+    - Download all the summaries from your playlist at once!
    
+- **Style Settings**
+    - Toggle the description on and off
+    - Increase font button
+
 - **DOTENV**
     - Store your API safely in a .env file in the root directory
 
 - **Coming soon**
-    - Style functions such as font changing and display options
+    - Style permanance for text
     - Bug fixes
 
 ## Setup and Use  

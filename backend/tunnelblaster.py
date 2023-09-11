@@ -131,7 +131,8 @@ def get_title_and_description(metadata): #yt-dlp
     video_description = metadata.get('description')
     upload_date = metadata.get('upload_date')
     duration_string = metadata.get('duration_string')
-    return video_title, video_description, upload_date, duration_string
+    uploader_id = metadata.get('uploader_id')
+    return video_title, video_description, upload_date, duration_string, uploader_id
 
 def process_video_url(input, config):  #function for API endpoint
     try:
@@ -140,9 +141,10 @@ def process_video_url(input, config):  #function for API endpoint
         plain_text = get_plain_text_from_ttml(subtitle_url)
         map_prompt_template, combine_prompt_template = initialize_prompts(config)
         summary = map_reduce_and_summarize(plain_text, map_prompt_template, combine_prompt_template)
-        video_title, video_description, upload_date, duration_string = get_title_and_description(metadata)
+        video_title, video_description, upload_date, duration_string, uploader_id = get_title_and_description(metadata)
         summary = {
             'title': video_title,
+            'uploader_id': uploader_id,
             'url': input,
             'upload_date': upload_date,
             'duration': duration_string,
