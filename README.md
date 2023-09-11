@@ -32,6 +32,7 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     - Bug fixes
 
 ## Setup and Use  
+
 <sub>tl;dr Install dependencies with "pip install -r requirements". Put the api key into ".env" file in root.  Fire up the backend server with "python3 app.py". Copy and rename manifest file for specific browser, chrome or firefox. Load the extension into your browser. Configure with popup action (puzzle).  Fetch info with sidepanel (ctrl+B in firefox).</sub>
 
 1.   **Install the Dependencies**
@@ -60,9 +61,10 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     - Start up the server "python3 app.py"
 
 4.  **Install the Extension**
+
 <sub>The manifest file is the director for most browser extension configurations.  Chrome and firefox converge on most manifest keywords, however in Manifest V3, many are still being phased in and out.  This means that for the time being we will need to have separate manifest files for each browser.  If you know a work around for this, please let me know!</sub>
 
-- Check the manifest file **Important** 
+- Check the manifest file (This is **Important!**) 
     - Go to manifest folder and pick chrome or firefox manifest.  Rename it to *manifest.json* 
     - Place the manifest in the root of VanillaExtension folder and delete any other manifests there. (There can be only one!)
 
@@ -90,7 +92,7 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     - The popup action will also allow you to configure you prompts.  If you remove all prompts, the next session will default to the original prompts.
     - After navigating to a youtube video or playlist, open the side bar with "ctrl+B" and click "fetch info"
 
-# Configuring the Prompts
+## Configuring the Prompts
 
 The popup action will allow you to set your prompts.  I suggest the following format
         Map:  Please write a concise summary of the following:
