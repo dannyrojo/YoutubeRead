@@ -59,7 +59,7 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     - Navigate to the backend folder 
     - Start up the server "python3 app.py"
 
-4.    **Install the Extension**
+4.  **Install the Extension**
 <sub>The manifest file is the director for most browser extension configurations.  Chrome and firefox converge on most manifest keywords, however in Manifest V3, many are still being phased in and out.  This means that for the time being we will need to have separate manifest files for each browser.  If you know a work around for this, please let me know!</sub>
 
 - Check the manifest file **Important** 
@@ -76,7 +76,7 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     - FYI: (Unfortunately, you will have to install this everytime you load up firefox, due to security) - If you know a workaround, let me know!
     - Go to "about:debugging" in the navigator and load a temporary extension.   Select the manifest.json *(make sure to select the correct one)* in the VanillaExtension folder.
     
-5.  ** Use the Extension**
+5.  **Use the Extension**
 
     Chrome: 
     - The popup action is a native button that looks like a puzzle piece in the top right.  Configure and set your prompts here.  You can add and remove prompts.  If you remove all prompts, next session will sync to the default prompt.   
