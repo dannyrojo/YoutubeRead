@@ -94,7 +94,8 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 
 ## Configuring the Prompts
 
-The popup action will allow you to set your prompts.  I suggest the following format
+The popup action will allow you to set your prompts.  I suggest the following format,
+
         Map:  Please write a concise summary of the following:
         Reduce:  Please write a concise summary of the following:
 
