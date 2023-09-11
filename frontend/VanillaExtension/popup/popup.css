@@ -9,9 +9,14 @@ background-color: #ffffff;
 
 }
 
-/* Style for the textarea */
-#configurationText {
-resize:none;
+/* Style for the textarea(USE LATER) */
+#mapText {
+resize:vertical;
+width: 100%;
+}
+
+#reduceText {
+resize:vertical;
 width: 100%;
 }
 

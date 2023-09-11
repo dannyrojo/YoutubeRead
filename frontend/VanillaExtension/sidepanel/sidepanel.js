@@ -1,50 +1,151 @@
-/* ON INSTALL (LISTENERS) */
+/* TRANSIENT GLOBALS */ 
 
-function createSidePanelListeners() { // Create the Event Listeners for Buttons
-  try {
-      document.getElementById('fetch-info-button').addEventListener('click', fetchInformation);
-      document.getElementById('prev-button').addEventListener('click', navigatePrevious);
-      document.getElementById('next-button').addEventListener('click', navigateNext);
-      document.getElementById('container-dropdown').addEventListener('change', changeContainer);
-      document.getElementById('download-info-button').addEventListener('click', downloadCurrentInfo);
-      } catch (error) {
-          console.error('Event Listeners Missing:', error);
+let globalInformationObject = [] 
+
+/* STATE */
+
+document.addEventListener('DOMContentLoaded', onDomLoad);
+function onDomLoad(){
+  chrome.storage.session.get(["storedInfo"]).then((result) => {
+    if (result.storedInfo){
+        console.log("ONLOAD: This info was pulled from storage:", result);
+        globalInformationObject = result.storedInfo;
+        refreshMenu();
+      }
+    });
+}
+
+/* LISTENERS */
+
+document.getElementById('fetch-info-button').addEventListener('click', fetchCallback);
+document.getElementById('prev-button').addEventListener('click', navPrevious);
+document.getElementById('next-button').addEventListener('click', navNext);
+document.getElementById('dropdownMenu').addEventListener('click', updateDom);
+document.getElementById('download-info-button').addEventListener('click', downloadCurrentInfo);
+
+/* FETCHING FUNCTIONS */
+
+async function fetchCallback (){  //main callback function
+  activeUrl = await getUrl();  // get the active window's URL
+  config = await getCurrentConfig(); //get current promp configuration
+  const firstMessage = {action: 'fetchUrlList', url: activeUrl};  //checks if the url is a playlist on the backend
+  const listPayload = await chrome.runtime.sendMessage(firstMessage);
+  for(const [index, value] of listPayload.url_array.entries()){   //for loop sends messages so that summaries will display one at a time
+      const secondMessage = {action: 'fetchVideoInformation', url: value, prompts: config};
+      const infoPayload = await chrome.runtime.sendMessage(secondMessage);
+      const info = infoPayload.video_info;
+      addSummary(info);
+      refreshMenu();
+      storeInfo();  //save state
+}}
+async function getUrl() { // Uses the "tabs" API
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  const activeTab = tabs[0];
+  const url = activeTab.url;
+  return url;
+}
+async function downloadCurrentInfo(){  //downloads as Markdown file
+     //identify index via selected dropdown option
+      const dropdown = document.getElementById('dropdownMenu');
+      const dropdownIndex = parseInt(dropdown.value, 10);
+      const globalInfo = globalInformationObject;
+      const info = globalInfo[dropdownIndex];
+      // convert to string
+      var markdownText = `- **Title**: ${info.title}\n  **URL**: ${info.url}\n **Upload Date**: ${info.upload_date}\n **Duration**: ${info.duration}\n **Summary**: ${info.summary}\n **Description**: ${info.description}\n`;
+      //make the binary
+      var blob = new Blob([markdownText], {type: 'text/markdown'}); 
+      // create a link
+      var url = URL.createObjectURL(blob);
+      //create a clean title for saving
+      const cleanTitle = info.title 
+      newTitle = cleanTitle.replace(/[^a-z0-9/s]/gi, '_').trim();
+      console.log("Clean Title:", newTitle);
+      //download the binary and clear the link
+      chrome.downloads.download({
+        url: url,
+        filename: `${newTitle}`,
+        saveAs:true  // for a menu popup
+      }, function(){URL.revokeObjectURL(url);
+      })
+};
+async function getCurrentConfig(){  //pulls prompt configuration from sync storage
+  object = chrome.storage.sync.get('currentConfig');
+  console.log("Pulled current config from storage:", object);
+  return object;
+}
+async function storeInfo (){  //stores global information object to session storage
+  const storedInfo = globalInformationObject;
+  await chrome.storage.session.set({storedInfo: storedInfo});
+  return console.log("Stored information to session storage:", storedInfo);
+}
+
+/* NAV FUNCTIONS */
+
+function navNext(){
+  const dropdown = document.getElementById('dropdownMenu');
+  if (dropdown.selectedIndex < dropdown.options.length - 1) {
+    dropdown.selectedIndex += 1; 
+  } else {
+    dropdown.selectedIndex = 0;
   }
+  updateDom();
 }
-createSidePanelListeners(); // Top level function runs on install
-
-/* DOM FUNCTIONS */
-
-function increaseTextSize() { // A function for increasing font size  
-  const fontSizeIncrement = 2;  
-  const changeDiv = document.getElementById('summaryDiv');  
-  const currentFontSize = parseFloat(getComputedStyle(changeDiv).fontSize);  //Method for parsing the font size
-  const newFontSize = currentFontSize + fontSizeIncrement + 'px';
-  changeDiv.style.fontSize = newFontSize;
+function navPrevious(){
+  const dropdown = document.getElementById('dropdownMenu');
+  if (dropdown.selectedIndex > 0) {
+    dropdown.selectedIndex -= 1; 
+  } else {
+    dropdown.selectedIndex = dropdown.length - 1;
+  }
+  updateDom();
 }
-function updateSidePanelContent(info, index) {
-  console.log("updateSidePanel got the info:", info);
-  const input = info.video_info;   //may need to restrucure object structure later
-  const sidePanelContent = document.querySelector('.side-panel-content');
+
+/* DOM FUNCTIONS*/
+
+function addSummary(object){ //pushes new summary to global information object
+  const newObject = globalInformationObject;
+  newObject.push(object);
+  globalInformationObject = newObject;
+  return console.log("New object stored to global (not storage):", object);
+}
+function refreshMenu(){  //updates the dropdown menu using global information object
+  const dropdown = document.getElementById('dropdownMenu');
+  dropdown.innerHTML = "";
+  const summaries = globalInformationObject;
+  summaries.forEach((object, index) => {
+    const title = object.title.substring(0,20); //first 20 words of the title becomes dropdown title
+    const option = document.createElement('option');
+    option.text = `${index} : ${title}...`;
+    option.value = index;
+    dropdown.appendChild(option);
+  });
+  return console.log("Dropdown options populated.");
+}
+function updateDom(){  //prints summary to DOM using dropdown menu selection as index
+  const dropdown = document.getElementById('dropdownMenu');
+  const dropdownIndex = parseInt(dropdown.value, 10);
+  const globalInfo = globalInformationObject;
+  const info = globalInfo[dropdownIndex];
+  const sidePanel = document.querySelector('.side-panel-content');
+  sidePanel.innerHTML = "";
 
   //Create a unique container
   const infoDiv = document.createElement('div');  //Create the divider
   infoDiv.classList.add('info-entry');  //Name the selector
-  infoDiv.id = `info-${index}`; //Create a unique id
 
   //Add elements
   const title = document.createElement('h3');
-  title.textContent = input.title;
+  title.textContent = info.title;
   const url = document.createElement('p');
-  url.textContent = input.url;
+  url.textContent = info.url;
   const uploadDate = document.createElement('p');
-  uploadDate.textContent = `Upload Date: ${input.upload_date}`;
+  uploadDate.textContent = `Upload Date: ${info.upload_date}`;
   const duration = document.createElement('p');
-  duration.textContent = `Duration: ${input.duration}`;
+  duration.textContent = `Duration: ${info.duration}`;
   const summary = document.createElement('p');
-  summary.textContent = `Summary: ${input.summary}`;
+  summary.textContent = `Summary: ${info.summary}`;
   const description = document.createElement('p');
-  description.textContent = `Description: ${input.description}`;
+  description.textContent = `Description: ${info.description}`;
 
   //Append the elements
   infoDiv.appendChild(title);
@@ -55,201 +156,16 @@ function updateSidePanelContent(info, index) {
   infoDiv.appendChild(description);
   
   //Print the container
-  sidePanelContent.appendChild(infoDiv);
-  console.log("ADDED THE CONTENT");
+  sidePanel.appendChild(infoDiv);
+  return console.log("Modified DOM to display:", info);
 }
 
-/* NAVIGATION FUNCTIONS */
+/* STYLING FUNCTIONS */
 
-let navigatorLength = 0;  // Globals for navigator, adjusted by storage listenere
-let currentObjectIndex = 0;  
-
-chrome.storage.onChanged.addListener(function(changes, namespace){
-  if (namespace === "session" && changes.storedVideoInfo) {
-    navigatorLength = changes.storedVideoInfo.newValue.length || 0;
-    console.log("This is the new value of navigatorLength:", navigatorLength);
-  }
-});
-function navigatePrevious() {
-  if (navigatorLength > 0) {  // Check if empty so the navigation doesn't blank out
-    currentObjectIndex = (currentObjectIndex - 1 + navigatorLength) % navigatorLength;
-    showCurrentObjectInDom(currentObjectIndex);
-  }
-}
-function navigateNext() {
-  if (navigatorLength > 0) {  
-    currentObjectIndex = (currentObjectIndex + 1) % navigatorLength;
-    showCurrentObjectInDom(currentObjectIndex);
-  }
-}
-function showCurrentObjectInDom(input) { // A function for displaying the appropriate container(perhaps have a drop down list)
-  const containers = document.querySelectorAll('.info-entry'); //selects all the divs that have been appended so far
-  console.log("The class selector pulled these containers:", containers);
-  containers.forEach((container, index) => {  //destructures the containers and updates the state with the divs that have been added so far
-    if (index === input) {
-      container.classList.add('active');
-    } else {
-      container.classList.remove('active');
-    }
-  });
-  console.log("SHOWING NEW OBJECT WITH NEW INDEX, CURRENTINDEX", currentObjectIndex);
-}
-
-/* DROP DOWN */
-
-function populateDropdownOptions(){
-  const dropdown = document.getElementById('container-dropdown');
-  dropdown.innerHTML = '';
-  const containers = document.querySelectorAll('.info-entry');
-  containers.forEach((container, index) => {
-    const option = document.createElement('option');
-    option.value = index;
-    option.text = `Container ${index}`;
-    dropdown.appendChild(option);
-    console.log("New option added:", option.text);
-  });
-}
-function changeContainer(){
-  const dropdown = document.getElementById('container-dropdown');
-  const selectedIndex = parseInt(dropdown.value, 10); // Don't forget to convert to Integer!  Dropdownw options only do strings.
-  currentObjectIndex = selectedIndex;
-  console.log("The dropdown was clicked and the selectedIndex was set to:", selectedIndex);
-  showCurrentObjectInDom(currentObjectIndex);
-}
-
-/* STORAGE FUNCTIONS */
-
-async function storeUrlListToSession(input) {
-  // For debugging
-  console.log("We just entered the storeUrlListToSession function");
-  console.log("This url array will be stored to session storage:", input.url_array);
-  // Retrieve stored data and append the new data
-  chrome.storage.session.get(["storedUrlList"]).then((result) => { //storage is asynchronous so use promise instead of "await" on callback
-    const storedData = result.storedUrlList || [];  //for maiden run checks if falsy
-    console.log("This is the value of storedData in UrlList before it's appended:", storedData);
-    const updatedData = storedData.concat(input.url_array);  //add the current iteration's urls
-    console.log("This is the value that will be stored to storedUrlList:", updatedData);
-    return chrome.storage.session.set({ storedUrlList: updatedData }); // return another asynchronous event 
-  }).then(() => {
-    console.log("Url List was stored successfully");
-  }).catch((error) => {
-    console.error('urlList did not get stored:', error);
-  });
-}
-async function storeVideoInformationToSession(input){  //should change to session storage later
-    console.log("We have juust entered the storeVideoInformationToSession function");
-    console.log("This video information will be stored to session storage:", input.video_info);
-    //Retrieve and append
-    chrome.storage.session.get(["storedVideoInfo"]).then((result) => {
-      const storedData = result.storedVideoInfo || [];
-      console.log("This is the value of storedData in VideoInfo before it's appended:", storedData);
-      const updatedData = storedData.concat(input.video_info);
-      console.log("This is the value that will be stored in Video Info:", updatedData);
-      return chrome.storage.session.set({storedVideoInfo: updatedData});
-    }).then(() => {
-      console.log("Video Info was stored successfully");
-    }).catch((error) => {
-      console.error('Video Info did not get stored:', error);
-    });
-}
-
-/* DOWNLOAD FUNCTIONS */
-
-async function downloadAllInfo(){
-  //grab from storage
-  chrome.storage.session.get(["storedVideoInfo"]).then((result) => {
-      const storedData = result.storedVideoInfo;
-      //identify index and pull object
-      const index = currentObjectIndex;
-      const info = storedData[index];
-      console.log("THIS IS THE INFO PULLED FOR DOWNLOADING:", info);
-      // convert to text by mapping and joining
-      var markdownText = info.map(function(object){
-        return `- **Title**: ${object.title}\n  **URL**: ${object.url}\n **Upload Date**: ${object.upload_date}\n **Duration**:${object.duration}\n **Summary**:${object.summary}\n **Description**:${object.summary}\n`;
-      }).join('\n\n');
-      var blob = new Blob([markdownText], {type: 'text/markdown'}); 
-      var url = URL.createObjectURL(blob);
-      chrome.downloads.download({
-        url: url,
-        filename: 'data.md',
-        saveAs:true
-      }, function(){URL.revokeObjectURL(url);
-      })
-    });}
-async function downloadCurrentInfo(){
-  //grab from storage
-  chrome.storage.session.get(["storedVideoInfo"]).then((result) => {
-      const storedData = result.storedVideoInfo;
-      //identify index and pull object
-      const index = currentObjectIndex; //defined globally
-      const info = storedData[index];
-      console.log("THIS IS THE INFO PULLED FOR DOWNLOADING:", info);
-      // convert to string
-      var markdownText = `- **Title**: ${info.title}\n  **URL**: ${info.url}\n **Upload Date**: ${info.upload_date}\n **Duration**: ${info.duration}\n **Summary**: ${info.summary}\n **Description**: ${info.description}\n`;
-      //make the binary
-      var blob = new Blob([markdownText], {type: 'text/markdown'}); 
-      // create a link
-      var url = URL.createObjectURL(blob);
-      //download the binary and clear the link
-      chrome.downloads.download({
-        url: url,
-        filename: `${info.title}`,
-        saveAs:true  // for a menu popup
-      }, function(){URL.revokeObjectURL(url);
-      })
-    });
-}
-
-/* CONFIGURATION OPTIONS */
-
-
-/* FETCHING FUNCTIONS */
-
-async function fetchInformation (){ // This is the main callback function for the button 'click'
-  console.log("We have entered the fetchInformation Function.");
-  const response = await sendMessageToFetchUrlList();
-  console.log("The execution has passed the 'await sendMessageToFetchUrlList' function and it came back:", response)
-  await storeUrlListToSession(response);
-  console.log("The execution has passed the 'await storeUrlListToSession' function")
-  await processUrlList(response);
-}
-async function getActiveTabUrl() { // A function to peek into the "tab" with "tabs" API
-  console.log("We have entered ActiveTabUrl Function")
-  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-  const activeTab = tabs[0];
-  const hostUrl = activeTab.url;
-  return hostUrl;
-}
-async function sendMessageToFetchUrlList() { // A function that essentially delivers the hostUrl to the background script 
-  try {
-    console.log("We have entered the sendMessageToFetchUrlList function")
-    hostUrl = await getActiveTabUrl();
-    console.log("HostUrl came through. Gonna send the message:", hostUrl);
-    const message = { action: 'fetchUrlList', url: hostUrl };
-    const payload = await chrome.runtime.sendMessage(message);
-    console.log("sendMessageTofetchUrlList completing... payload returned:", payload);
-    
-    return payload;
-    
-  } catch (error) {
-    console.error('Sending message to fetch UrlList failed:', error);
-    
-  }
-}
-async function processUrlList(input){
-  for(const [index, value] of input.url_array.entries()){  //destructures the object (may need to reformat the object structure later)
-    console.log("This is value, index:", value, " ", index);
-    const info = await sendMessageToFetchInformation(value); //send to background -> API
-    await storeVideoInformationToSession(info);
-    updateSidePanelContent(info, index);
-    showCurrentObjectInDom(currentObjectIndex);  //update Navigator
-    populateDropdownOptions();
-  }
-}
-async function sendMessageToFetchInformation(input){
-  console.log("Send message to Fetch Info recieved value:", input);
-  const message = {action: 'fetchVideoInformation', url: input};
-  const payload = await chrome.runtime.sendMessage(message);
-  console.log("sendMessageToFetchInfo returned payload:", payload);
-  return payload;
+function increaseFont() { 
+  const fontSizeIncrement = 2;  
+  const changeDiv = document.getElementById('summaryDiv');  
+  const currentFontSize = parseFloat(getComputedStyle(changeDiv).fontSize);  
+  const newFontSize = currentFontSize + fontSizeIncrement + 'px';
+  changeDiv.style.fontSize = newFontSize;
 }

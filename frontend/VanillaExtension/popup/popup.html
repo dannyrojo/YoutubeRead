@@ -7,18 +7,27 @@
 <body>
   <h3>Configuration Options:</h3>
   <p> Write a custom prompt in the following format: "Please write a concise summary of the following text:" or "I would like you to find the define important key terms for the following text:"</p>
-  
+  <select id="dropdownMenu">
+    <option value="-1">Select a container</option>
+  </select>
   <div id="configurationDiv">
     <form>
-      <label for="configurationText">Prompt:</label><br>
-      <textarea id="configurationText"></textarea><br>
+      <label for="mapText">Map Prompt:</label><br>
+      <textarea id="mapText"></textarea><br>
+    </form>
+    <form>
+      <label for="reduceText">Reduce Prompt:</label><br>
+      <textarea id="reduceText"></textarea><br>
     </form>
   </div>
  
-  <div id="submitOptionsDiv">
-    <button id="submitOptionsButton">Submit Options</button>
+  <div id="submitOptionDiv">
+    <button id="submitOptionButton">Set Configuration</button>
   </div>
-
+  <div id="storageDiv">
+    <button id="addOptionButton">Add Option</button>
+    <button id="removeOptionButton">Remove Option</button>
+  </div>
   <script src="popup.js"></script>
 </body>
 </html>

@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { // Do 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { // Do not mark the callback function as "async" it will break the whole damn thing.
   if (message.action === 'fetchVideoInformation') {
-    fetch_video_info(message.url)
+    fetch_video_info(message.url, message.prompts)
       .then(response => sendResponse(response))
       .catch(error => sendResponse({ error: "An error occurred while fetching video Info" }));
     return true;  // Return true to indicate you wish to send a response asynchronously
@@ -41,14 +41,14 @@ async function fetch_array(url) {
 
 
 // Perfection
-async function fetch_video_info(url) {
+async function fetch_video_info(url, prompts) {
   try {
     const response = await fetch('http://127.0.0.1:5000/fetch_video_info', { //Fetch the url_array
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({url}),
+      body: JSON.stringify({url, prompts}),
     });
 
     const payload = await response.json();

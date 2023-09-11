@@ -8,3 +8,4 @@ loadkeys.sh
 __pycache__
 frontend/test
 background_copy.js
+test_scripts

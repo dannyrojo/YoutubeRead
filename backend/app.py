@@ -8,12 +8,10 @@ import tunnelblaster as tb
 
 app = Flask(__name__)
 
-#CORS Configurations (should probably secure more, maybe with another proxy)
-CORS(app, resources={r"/conf_CORS": {"origins": "*"},
-                    r"/fetch_url_array": {"origins": "*"},
+CORS(app, resources={r"/fetch_url_array": {"origins": "*"},  #OPEN ORIGINS UNTIL EXTENSION ID PROBLEM IS SOLVED
                     r"/fetch_video_info": {"origins": "*"}})
 
-app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024  #INCOMING SIZE LIMITER
+app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024  #INCOMING SIZE LIMITER (1MB)
 
 limiter = Limiter( #INCOMING RATE LIMITER
     app,
@@ -24,26 +22,13 @@ limiter = Limiter( #INCOMING RATE LIMITER
 @limiter.limit("15 per minute")
 def fetch_url_array_endpoint():
     try:
-
-        #Grab Data
         data = request.json
-        
-        #Check that there is an url, or formatted correctly
         if 'url' not in data:
             return jsonify({'error': 'Host URL not provided'}), 400
-        
-        #Save url
         url = data['url']
         print("API is processing host URL:", url)
-        
-        #Checks if playlist and extracts array of urls
-        url_array = tb.process_host_url(url)
-        print("API processed host url, here is the array:", url_array)
-
-        #Return array of urls as JSON object
-        return jsonify({'url_array': url_array}), 200
-        
-    # Error Handlers
+        payload = tb.process_host_url(url) #CHECKS THE HOST URL FOR PLAYLIST OR WRAP IN ARRAY   
+        return jsonify({'url_array': payload}), 200  #KEY FOR URL LIST IS 'URL_ARRAY'
     except Exception as e:
         return jsonify({'API failed to process host url': str(e)}), 500
 
@@ -51,25 +36,17 @@ def fetch_url_array_endpoint():
 @limiter.limit("15 per minute")
 def fetch_video_info_endpoint():
     try:
-        #Grab Data
         data = request.json
-        
-        #Check that there is an url, or formatted correctly
         if 'url' not in data:
             return jsonify({'error': 'Video url not provided'}), 400
-        
-        #Save url
+        if 'prompts' not in data:
+            return jsonify({'error': 'Config not provided, check browser extension popup'}), 400
         url = data['url']
-        print("API is processing video url:", url)
-        
-        #Checks if playlist and extracts array of urls
-        video_info = tb.process_video_url(url)
-        print("API processed video url, here is the information:", video_info)
-
-        #Return array of urls as JSON object
-        return jsonify({'video_info': video_info}), 200
-        
-    # Error Handlers
+        config = data['prompts']
+        print("API is processing video url:", url) 
+        payload = tb.process_video_url(url, config)  #PASS URL AND CONFIG TO FETCH INFORMATION
+        print("API processed video url, here is the information:", payload)
+        return jsonify({'video_info': payload}), 200 #RETURNS INFORMATION AS OBJECT
     except Exception as e:
         return jsonify({'API failed to process video url': str(e)}), 500
     

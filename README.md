@@ -1,4 +1,4 @@
-# YouTubeRead 0.7
+# YouTubeRead 0.8
 
 A personal project that extracts key information from YouTube videos and provides concise summaries.
 
@@ -27,11 +27,19 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     - Saves as a markdown file
     - All summaries will be saved in browser for the ***session only***
 
+- **Configuration Options**
+    - Action popup now allows you to adjust the chat prompt!
+    - This is synced across all devices!
+
+- **State Management**
+    - State is saved within session!  Open and close the sidebar with security.
+
+- **DOTENV**
+    - Store your API safely in a .env file in the root directory
+
 - **COMING SOON**
-    - Configuration options will be places on the action popup so you can adjust the summary parameters
-    - Configuration options will be synced across all devices
     - QOL functions such as font changing, display options such as summary only
-    - DOT ENV for easy storing of APIKEY
+    - Bug testing
 
 ## Setup and Use  
 <sub>(tl;dr Fire up the backend server with app.py, Place the appropriate manifest in the Extension Folder, load the extension in browser, open up sidepanel and go to a youtube page)</sub>
@@ -42,7 +50,8 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     - Subscribe at https://openai.com/blog/openai-api
     - Create an API key
 2. Set environment key:
-    - In the terminal where you are running the scripts or app.py "export openaikey=YOURKEYHERE"
+    - Create a file named ".env" in the root directory of this project.  
+    - In this file write "openaikey=YOURKEYHERE" on the first line
 
 -   **Install the Dependencies**
 
@@ -77,6 +86,7 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     -Load the contents of frontend/VanillaExtension
     -Click the sidebar button (looks like a shaded rectangle in a square) at the top right of the browser
     -Click on the dropdown menu and select "YoutubeRead"
+    -Set your configuration in the extension popup (puzzle piece at the top of the browser)
     -Navigate to a youtube video or playlist and click "Fetch Info"
 
         Firefox:  

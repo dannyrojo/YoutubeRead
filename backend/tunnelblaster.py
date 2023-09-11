@@ -10,6 +10,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from string import Template
 
 # Functions for extracting an array of urls from a playlist (or single video)
 def check_if_playlist(input):
@@ -80,8 +81,24 @@ def get_plain_text_from_ttml(url): #parser
     else:
         print("No valid URL for captions available.")
     return None
+
+def initialize_prompts(config):
+    print("THIS IS THE CONFIG FILE:", config)
+    custom_map = config['currentConfig']['mapText']
+    custom_combine = config['currentConfig']['reduceText']
+    mapTemplate = Template(""""$custom_map: "{text}""""")
+    map_prompt=mapTemplate.substitute(custom_map=custom_map)
+    map_prompt_template = PromptTemplate(template=map_prompt, input_variables=["text"])    
+    print("This is the map_prompt_template:", map_prompt_template)
     
-def map_reduce_and_summarize(plain_text): #langchain API
+    combineTemplate = Template(""""$custom_combine: "{text}""""")
+    combine_prompt=combineTemplate.substitute(custom_combine=custom_combine)
+    combine_prompt_template = PromptTemplate(template=combine_prompt, input_variables=["text"])
+    print("This is the combine_prompt_template:", combine_prompt_template)
+        
+    return combine_prompt_template, map_prompt_template
+
+def map_reduce_and_summarize(plain_text, map_prompt_template, combine_prompt_template): #langchain API
     if plain_text:
         
         #Configure langchain
@@ -94,20 +111,6 @@ def map_reduce_and_summarize(plain_text): #langchain API
         text_splitter = RecursiveCharacterTextSplitter(separators=[" "], chunk_size=10000, chunk_overlap=500)
         docs = text_splitter.create_documents([plain_text])
 
-        #Create prompts for map/reduce   
-        map_prompt = """
-        Please summarize the following text while still keeping many of the important details: 
-        "{text}"
-        """
-        map_prompt_template = PromptTemplate(template=map_prompt, input_variables=["text"])    
-        
-        combine_prompt = """
-        Please write a concise summary of the following text:
-        "{text}"
-        
-        """
-        combine_prompt_template = PromptTemplate(template=combine_prompt, input_variables=["text"])
-        
         #Define chain type, run, return
         summary_chain = load_summarize_chain(llm=llm,
                                             chain_type='map_reduce',
@@ -130,12 +133,13 @@ def get_title_and_description(metadata): #yt-dlp
     duration_string = metadata.get('duration_string')
     return video_title, video_description, upload_date, duration_string
 
-def process_video_url(input):  #function for API endpoint
+def process_video_url(input, config):  #function for API endpoint
     try:
         metadata = extract_metadata(input)
         subtitle_url = get_subtitle_url(metadata)
         plain_text = get_plain_text_from_ttml(subtitle_url)
-        summary = map_reduce_and_summarize(plain_text)
+        map_prompt_template, combine_prompt_template = initialize_prompts(config)
+        summary = map_reduce_and_summarize(plain_text, map_prompt_template, combine_prompt_template)
         video_title, video_description, upload_date, duration_string = get_title_and_description(metadata)
         summary = {
             'title': video_title,
