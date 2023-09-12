@@ -48,10 +48,11 @@ async function getUrl() { // Uses the "tabs" API
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   const activeTab = tabs[0];
   const url = activeTab.url;
-  const youtubeUrlPattern = /^(https?:\/\/)?(www\.)?youtube\.com\/(watch\?v=.+|playlist\?list=.+)$/;
+  const youtubeUrlPattern = new RegExp("^https:\/\/www\.youtube\.com\/(?:watch\\?v=[\\w-]+(?:&list=[\\w-]+(?:&index=\\d+)?)?(?:&t=\\d+s)?)?|playlist\\?list=[\\w-]+$");
   if (youtubeUrlPattern.test(url)){
     return url;
   } else {
+    console.log("Bad URL Pattern.")
     return null;
   }
 }

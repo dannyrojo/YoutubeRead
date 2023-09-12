@@ -35,6 +35,12 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
 - **Coming soon**
     - Style permanance for text
     - Bug fixes
+    
+## Bugs and Fixes
+    - (fixed)  Single video fetch not working if in playlist
+    - (fixed)  Pulls the extension URL if on the wrong active page, corrupts dropdown menu
+    - Errors on the backend propagate to front end
+    - Font increase transiesnt, dependent on parsing, switch to CSS
 
 ## Setup and Use  
 

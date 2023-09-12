@@ -11,11 +11,20 @@ from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from string import Template
+import re
 
 # Functions for extracting an array of urls from a playlist (or single video)
 def check_if_playlist(input):
     parsed_url = urlparse(input)
     return parsed_url.path == "/playlist"
+
+def truncate_url(url):
+    result = re.match(r'^https://www\.youtube\.com/watch\?v=[\w-]+', url)
+    if result:
+        return result.group(0)
+    else:
+        print("Invalid URL format.")
+        return None
 
 def extract_urls_from_playlist(input):
     list_of_urls = []
@@ -36,7 +45,9 @@ def process_host_url (input):  #function for API endpoint
     if check_if_playlist(input): 
         url_array = extract_urls_from_playlist(input) # If url is a playlist, create an array of urls
     else:
-        url_array = [input] # If it is not a playlist then wrap the url into an array
+        url = input
+        truncated_url = truncate_url(url)
+        url_array = [truncated_url] # If it is not a playlist then wrap the url into an array
     print("This is the array of urls (url_array):", url_array)
     return url_array
 
@@ -53,6 +64,9 @@ def extract_metadata(video_url): #yt-dlp
             return None
                
 def get_subtitle_url(metadata): #yt-dlp
+    with open('metadata.txt','w') as file:
+        file.write(str(metadata))
+
     lang = "en-US"
     language_codes_to_check = [lang, lang.split('-')[0]] 
     for code in language_codes_to_check:
