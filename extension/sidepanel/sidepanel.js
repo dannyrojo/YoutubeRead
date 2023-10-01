@@ -100,7 +100,7 @@ async function downloadAllInfo(){  //downloads all info objects in global memory
    }
 };
 async function getCurrentConfig(){  //pulls prompt configuration from sync storage
-  object = chrome.storage.sync.get('currentConfig');
+  object = chrome.storage.local.get('currentConfig');
   console.log("Pulled current config from storage:", object);
   return object;
 }

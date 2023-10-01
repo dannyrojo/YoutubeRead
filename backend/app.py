@@ -48,7 +48,8 @@ def fetch_video_info_endpoint():
         print("API processed video url, here is the information:", payload)
         return jsonify({'video_info': payload}), 200 #RETURNS INFORMATION AS OBJECT
     except Exception as e:
-        return jsonify({'API failed to process video url': str(e)}), 500
+        print(jsonify({'API failed to process video url': str(e)}), 500)  #DOUBLE CHECK THE ERROR
+        raise e
     
 if __name__ == '__main__':
     app.run(debug=True)

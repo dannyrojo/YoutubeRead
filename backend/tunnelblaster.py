@@ -117,7 +117,7 @@ def map_reduce_and_summarize(plain_text, map_prompt_template, combine_prompt_tem
         
         #Configure langchain
         openaikey = os.environ.get('openaikey')
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key="openaikey")
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key=openaikey)
         num_tokens = llm.get_num_tokens(plain_text)
         print (f"Our text has {num_tokens} tokens")
 

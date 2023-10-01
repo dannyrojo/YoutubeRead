@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { // Do 
 // You do you beau. 
 async function fetch_array(url) {
   try {
-    const response = await fetch('http://45.79.103.107/fetch_url_array', { 
+    const response = await fetch('http://45.33.13.125:8000/fetch_url_array', { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ async function fetch_array(url) {
 // Perfection
 async function fetch_video_info(url, prompts) {
   try {
-    const response = await fetch('http://45.79.103.107/fetch_video_info', { //Fetch the url_array
+    const response = await fetch('http://45.33.13.125:8000/fetch_video_info', { //Fetch the url_array
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
