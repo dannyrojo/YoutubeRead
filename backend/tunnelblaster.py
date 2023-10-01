@@ -63,9 +63,9 @@ def extract_metadata(video_url): #yt-dlp
             print(f"Error extracting metadata for the following: {video_url}: {e}")
             return None
                
-def get_subtitle_url(metadata): #yt-dlp
-    with open('metadata.txt','w') as file:
-        file.write(str(metadata))
+def get_subtitle_url(metadata):
+    #wit open('metadata.txt','w') as file:
+        #file.write(str(metadata))
 
     lang = "en-US"
     language_codes_to_check = [lang, lang.split('-')[0]] 
@@ -117,7 +117,7 @@ def map_reduce_and_summarize(plain_text, map_prompt_template, combine_prompt_tem
         
         #Configure langchain
         openaikey = os.environ.get('openaikey')
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key=openaikey)
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0, openai_api_key="openaikey")
         num_tokens = llm.get_num_tokens(plain_text)
         print (f"Our text has {num_tokens} tokens")
 

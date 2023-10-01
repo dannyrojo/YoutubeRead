@@ -5,12 +5,12 @@ let globalConfigOptions = []
 document.addEventListener('DOMContentLoaded', onDomLoad);
 
 function onDomLoad(){ 
-  chrome.storage.sync.get(["storedOptions"]).then((result) => {
-    if (result || result.storedOptions > 0){
+  chrome.storage.local.get(["storedOptions"]).then((result) => {
+    if (result.storedOptions && Array.isArray(result.storedOptions) && result.storedOptions.length > 0){
       globalConfigOptions = result.storedOptions;
       console.log("The previous state was loaded:", result.storedOptions);
     }
-    else if (!result || result.storedOptions.length < 1 || result.length < 1){
+    else {
       const defaultConcise = {mapText : 'Please write a concise summary of the following:', reduceText : 'Please write a concise summary of the following:'};
       globalConfigOptions = [defaultConcise];
       console.log("No previous state found. Loading Default");
@@ -65,12 +65,16 @@ function setTextObject(object){
 /* STORAGE FUNCTIONS */
 async function storeCurrentConfig(object){ 
   const currentConfig = object;
-  chrome.storage.sync.set({currentConfig : currentConfig});
+  chrome.storage.local.set({currentConfig : currentConfig});
   return console.log("currentConfig Stored:", currentConfig);
 }
 async function storeOptions(){
-  chrome.storage.sync.set({storedOptions : globalConfigOptions});
-  return console.log("Global Options Stored To Sync:", globalConfigOptions);
+  try {
+    chrome.storage.local.set({storedOptions : globalConfigOptions});
+    console.log("Global Options Stored To Local:", globalConfigOptions);
+  } catch (error) {
+    console.error("Error storing options with storeOptions:", error);
+  }
 }
 
 /* DROPDOWN FUNCTIONS */
@@ -106,7 +110,7 @@ function removeOption(){
   const options = globalConfigOptions;
   const removedOption = options.splice(dropdownIndex, 1);
   globalConfigOptions = options;
-  chrome.storage.sync.set({storedOptions : globalConfigOptions});
+  chrome.storage.local.set({storedOptions : globalConfigOptions});
   return console.log("Option removed:", removedOption);
 }
 function addOption(object){ 

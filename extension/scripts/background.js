@@ -1,3 +1,6 @@
+//OAuth authentication for Google API
+//https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
+
 // This function's async is NOW working properly
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { // Do not mark the callback function as "async" it will break the whole dang thing.
   if (message.action === 'fetchUrlList') {
@@ -20,7 +23,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { // Do 
 // You do you beau. 
 async function fetch_array(url) {
   try {
-    const response = await fetch('http://127.0.0.1:5000/fetch_url_array', { 
+    const response = await fetch('http://45.79.103.107/fetch_url_array', { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +46,7 @@ async function fetch_array(url) {
 // Perfection
 async function fetch_video_info(url, prompts) {
   try {
-    const response = await fetch('http://127.0.0.1:5000/fetch_video_info', { //Fetch the url_array
+    const response = await fetch('http://45.79.103.107/fetch_video_info', { //Fetch the url_array
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

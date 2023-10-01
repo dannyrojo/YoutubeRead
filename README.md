@@ -33,8 +33,9 @@ Inspired by countless hours of scrolling through Youtube videos trying to find t
     - Store your API safely in a .env file in the root directory
 
 - **Coming soon**
-    - Style permanance for text
+    - Style permanence for text
     - Bug fixes
+    - Refactoring for simplicity and new features
     
 ## Bugs and Fixes
     - (fixed)  Single video fetch not working if in playlist

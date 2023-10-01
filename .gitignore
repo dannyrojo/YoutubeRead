@@ -1,5 +1,5 @@
 test_scripts/scriptsvenv
-backend/backendvenv/
+backend/venv/
 frontend/venv
 github
 github.pub
